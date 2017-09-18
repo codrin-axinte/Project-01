@@ -49,28 +49,27 @@ Scrum literature encourages splitting a task into several if the estimate exceed
 
 There are three essential roles in any Scrum project:
 
-Product Owner
-ScrumMaster
-Team
+* Product Owner
+* ScrumMaster
+* Team
 
 ### Release
 
 The transition of an increment of potentially shippable product from the development team into routine use by customers. Releases typically happen when one or more sprints has resulted in the product having enough value to outweigh the cost to deploy it.
 
-"The product is released to customer or marketplace obligations. The release balances functionality, cost, and quality requirements against date commitments." (Schwaber/Beedle, Agile Software Development with Scrum, p. 80).
+"*The product is released to customer or marketplace obligations. The release balances functionality, cost, and quality requirements against date commitments.*" (Schwaber/Beedle, Agile Software Development with Scrum, p. 80).
 
 ### Impediments
 
-Anything that prevents a team member from performing work as efficiently as possible is an impediment. Each team member has an opportunity to announce impediments during the daily Scrum meeting. The ScrumMaster is charged with ensuring impediments get resolved. ScrumMasters often arrange sidebar meetings when impediments cannot be resolved on the spot in the daily Scrum meeting.
-
+Anything that prevents a team member from performing work as efficiently as possible is an impediment. Each team member has an opportunity to announce impediments during the daily Scrum meeting. **The ScrumMaster** is charged with ensuring impediments get resolved. ScrumMasters often arrange sidebar meetings when impediments cannot be resolved on the spot in the daily Scrum meeting.
 
 ### Daily Scrum Meeting
 
 A fifteen-minute daily meeting for each team member to answer three questions:
 
-"What have I done since the last Scrum meeting? (i.e. yesterday)"
-"What will I do before the next Scrum meeting? (i.e. today)"
-"What prevents me from performing my work as efficiently as possible?"
+"*What have I done since the last Scrum meeting*? (i.e. yesterday)"
+"*What will I do before the next Scrum meeting*? (i.e. today)"
+"*What prevents me from performing my work as efficiently as possible?*"
 The ScrumMaster ensures that participants call sidebar meetings for any discussions that go too far outside these constraints.
 
 The Scrum literature recommends that this meeting take place first thing in the morning, as soon as all team members arrive.
@@ -79,10 +78,9 @@ The Scrum literature recommends that this meeting take place first thing in the 
 
 The ScrumMaster is a facilitator for the team and product owner. Rather than manage the team, the ScrumMaster works to assist both the team and product owner in the following ways:
 
-Remove the barriers between the development and the product owner so that the product owner directly drives development.
-Teach the product owner how to maximize return on investment (ROI), and meet his/her objectives through Scrum.
-Improve the lives of the development team by facilitating creativity and empowerment.
-Improve the productivity of the development team in any way possible.
-Improve the engineering practices and tools so that each increment of functionality is potentially shippable.
-Keep information about the team's progress up to date and visible to all parties.
-Source: Agile Project Management with Scrum, Ken Schwaber
+* Remove the barriers between the development and the product owner so that the product owner directly drives development.
+* Teach the product owner how to maximize return on investment (ROI), and meet his/her objectives through Scrum.
+* Improve the lives of the development team by facilitating creativity and empowerment.
+* Improve the productivity of the development team in any way possible.
+* Improve the engineering practices and tools so that each increment of functionality is potentially shippable.
+* Keep information about the team's progress up to date and visible to all parties.
