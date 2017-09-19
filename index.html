@@ -1,0 +1,39 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Project 01</title>
+<style>
+#canvas {
+	background: #1e1e1e;
+	border: 2px #777777 solid;
+	margin: 0;
+	padding:0;
+	position:relative;
+	cursor: none;
+}
+.menu {
+ list-style: none;
+	margin:10px 0;
+	padding:0;
+ }
+.menu li {
+  display: inline-block;
+  margin-left: 5px;
+}
+</style>
+</head>
+<body>
+<h1>Welcome to Project 01</h1>
+<ul class="menu">
+	<li>Lives: <span id="lives"></span></li>
+	<li>Your Position: <span id="position"></span></li>
+</ul>
+<canvas 
+id="canvas" 
+width="700" 
+height="500"
+></canvas>
+<script src="script.js"></script>
+</body>
+</html>
