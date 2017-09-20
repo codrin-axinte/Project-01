@@ -7,7 +7,7 @@ Also there are some other features like **patrols** and **traps** which will inc
 User is able to choose his and enemies color as he likes.
 
 
-Some references I used:
+Some references I've used:
  * http://blog.sklambert.com/html5-canvas-game-2d-collision-detection/
  * https://stackoverflow.com/questions/19337180/movement-multiple-objects-in-canvas-to-x-y-coordinate
  * https://www.w3schools.com/graphics/game_intro.asp
