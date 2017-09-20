@@ -53,4 +53,5 @@ fabric.properties
 Project 001 - User Stories.xlsx
 .gitignore
 .idea/
-follow.js
+src/*
+/src/
