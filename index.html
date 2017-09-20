@@ -2,8 +2,19 @@
 <html>
 <head>
 <meta charset="utf-8" />
-<title>Project 01</title>
+<title>Project 01 - Traceball</title>
 <style>
+	* {
+		margin:0;
+		padding: 0;
+	}
+	html {
+	  background: url(bg.png) no-repeat center center fixed; 
+	  -webkit-background-size: cover;
+	  -moz-background-size: cover;
+	  -o-background-size: cover;
+	  background-size: cover;
+	}
 #canvas {
 	background: #1e1e1e;
 	border: 2px #777777 solid;
@@ -24,16 +35,24 @@
 </style>
 </head>
 <body>
-<h1>Welcome to Project 01</h1>
+<h1>Welcome to Project 01 - Traceball</h1>
 <ul class="menu">
+	<li>
+		<label for="playerColor">Your Color</label>
+		<input type="color" id="playerColor" value="#ffffff">
+	</li>
+	<li>
+	<label for="enemyColor">Enemy Color</label>
+	<input type="color" id="enemyColor" value="#ff0000">
+	</li>
+	<li><button id="btnStart">Start</button></li>
+</ul>
+<ul class="menu" style="display: none">
 	<li>Lives: <span id="lives"></span></li>
 	<li>Your Position: <span id="position"></span></li>
+	<li>Status: <span id="status">Playing...</span></li>
 </ul>
-<canvas 
-id="canvas" 
-width="700" 
-height="500"
-></canvas>
+<canvas id="canvas" width="700" height="500"></canvas>
 <script src="script.js"></script>
 </body>
 </html>
