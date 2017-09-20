@@ -1,39 +1,43 @@
 <!doctype html>
 <html>
 <head>
-<meta charset="utf-8" />
-<title>Project 01</title>
-<style>
-#canvas {
-	background: #1e1e1e;
-	border: 2px #777777 solid;
-	margin: 0;
-	padding:0;
-	position:relative;
-	cursor: none;
-}
-.menu {
- list-style: none;
-	margin:10px 0;
-	padding:0;
- }
-.menu li {
-  display: inline-block;
-  margin-left: 5px;
-}
-</style>
+    <meta charset="utf-8"/>
+    <title>Project 01 - Traceball</title>
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+    <link rel="stylesheet" href="main.css">
 </head>
 <body>
-<h1>Welcome to Project 01</h1>
-<ul class="menu">
-	<li>Lives: <span id="lives"></span></li>
-	<li>Your Position: <span id="position"></span></li>
-</ul>
-<canvas 
-id="canvas" 
-width="700" 
-height="500"
-></canvas>
+
+<div class="container">
+    <ul class="menu">
+        <li>
+            <strong>Project 01 - Traceball</strong>
+        </li>
+        <li class="divider"></li>
+        <li>
+            <label for="playerColor">Your Color</label>
+            <input type="color" id="playerColor" value="#ffffff">
+        </li>
+        <li>
+            <label for="enemyColor">Enemy Color</label>
+            <input type="color" id="enemyColor" value="#ff0000">
+        </li>
+        <li class="divider"></li>
+        <li>
+            <button id="btnStart" class="button primary">Start</button>
+        </li>
+    </ul>
+    <ul class="menu" id="hud" style="display: none">
+        <li>Lives: <strong><span id="lives"></span></strong></li>
+        <li>Status: <span id="status">Playing...</span></li>
+        <li class="divider"></li>
+        <li>Your Position: <span id="position"></span></li>
+    </ul>
+    <div class="aligner">
+        <canvas id="canvas" width="700" height="500" oncontextmenu="return false;"></canvas>
+    </div>
+</div>
+
 <script src="script.js"></script>
 </body>
 </html>
