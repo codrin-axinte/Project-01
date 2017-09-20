@@ -1,6 +1,6 @@
 # Project 01
 
-## Brief Description
+### Brief Description
 
 The game plot is to survive as much as you can, runnig from the chaser. 
 Also there are some other features like **patrols** and **traps** which will increase the difficulty.
