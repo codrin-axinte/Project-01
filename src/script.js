@@ -1,7 +1,9 @@
-function log(o) {
-    console.log(o);
-}
-
+/**
+ *
+ * @param {Vector} position
+ * @param {Vector} size
+ * @param {string} color
+ */
 function rect(position, size, color) {
     context.beginPath();
     context.fillStyle = color;
@@ -9,6 +11,12 @@ function rect(position, size, color) {
     context.fill();
 }
 
+/**
+ *
+ * @param {int} x
+ * @param {int} y
+ * @returns {Vector}
+ */
 function createVector(x = 0, y = 0) {
     return new Vector(x, y);
 }
@@ -26,7 +34,7 @@ const Utils = class {
      *  Gets random number between two values
      * @param from
      * @param to
-     * @returns {*}
+     * @returns {number}
      */
     static random(from, to) {
         return Math.floor(Math.random() * to) + from;
@@ -43,6 +51,11 @@ const Utils = class {
         return Math.hypot(vector.x - vector2.x, vector.y - vector2.y);
     }
 
+    /**
+     *
+     * @param canvas
+     * @returns {{x: number, y: number}}
+     */
     static getCanvasPos(canvas) {
         let xPosition = 0;
         let yPosition = 0;
@@ -58,6 +71,12 @@ const Utils = class {
         }
     }
 
+    /**
+     *
+     * @param e
+     * @param canvas
+     * @returns {{x: number, y: number}}
+     */
     static getCanvasCursorPos(e, canvas) {
         const canvasPos = Utils.getCanvasPos(canvas);
         return {
@@ -74,12 +93,16 @@ const EventDispatcher = class {
         this.on = this.dummy.addEventListener.bind(this.dummy);
     }
 
+    /**
+     * Creates and triggers a custom event
+     * @param eventName
+     * @param data
+     */
     trigger(eventName, data = null) {
         if (!eventName) return;
         let e = new CustomEvent(eventName, {detail: data});
         this.dummy.dispatchEvent(e);
     }
-
 };
 
 const GUI = class {
@@ -105,6 +128,10 @@ const GUI = class {
         return this.text('position', 'X: ' + vector.x + ', Y: ' + vector.y);
     }
 
+    score(value) {
+        return this.text('score', value);
+    }
+
 };
 
 const Vector = class {
@@ -128,8 +155,8 @@ const Vector = class {
     }
 
     static random() {
-        const x = Utils.random(1, boundings.width);
-        const y = Utils.random(1, boundings.height);
+        const x = Utils.random(30, boundings.width - 10);
+        const y = Utils.random(30, boundings.height - 10);
         return new Vector(x, y);
     }
 };
@@ -142,7 +169,7 @@ const Drawable = class {
         this.speed = 1;
         this.setColor('#ffffff');
         this.type = 0;
-        this.init();
+        this.onInit();
     }
 
     isType(type) {
@@ -153,13 +180,13 @@ const Drawable = class {
         return this.type === 0;
     }
 
-
-    init() {
+    isOther() {
+        return this.type > 0;
     }
 
-    draw() {
-        rect(this.position, this.size(), this.color);
+    onInit(e) {
     }
+
 
     move(position) {
         this.position.update(position);
@@ -170,7 +197,17 @@ const Drawable = class {
         return this;
     }
 
-    update(e) {
+    onReset(e) {
+    }
+
+    onUpdate(e) {
+    }
+
+    onDifficultyIncrease(e) {
+    }
+
+    onDraw(e) {
+        rect(this.position, this.size(), this.color);
     }
 
     size() {
@@ -203,28 +240,31 @@ const Drawable = class {
 };
 
 const Player = class extends Drawable {
-    init() {
+    onInit() {
         this.type = 0;
     }
 
-    update() {
+    onUpdate() {
         this.move(game.cursor);
     }
 
 };
 //AI Shadow following
 /**
- * Modes: 0 - Follows the target, 1 - Patrol in a radius
+ * Modes: 0 - Chaser, 1 - Patrol
  * @mode {Enemy}
  */
 const Enemy = class extends Drawable {
-    init() {
-        this.proximityRange = 150;
-        this.originalColor = this.color;
+    onInit() {
         this.type = 1;
         this.mode = 0;
         this.target = null;
         this.lastWaypoint = null;
+        this.originalColor = this.color;
+        this.proximityRange = 150;
+        this.increaseSpeed = 0.001;
+        this.increasePatrolAfter = 30; // seconds
+
     }
 
     setMode(type) {
@@ -235,7 +275,33 @@ const Enemy = class extends Drawable {
         this.target = target;
     }
 
-    update() {
+    isChaser() {
+        return this.mode === 0;
+    }
+
+    isPatrol() {
+        return this.mode === 1;
+    }
+
+    onReset(e) {
+        this.speed = 1;
+        this.lastWaypoint = null;
+        log('Reset speed: ' + this.speed);
+    }
+
+    onDifficultyIncrease(e) {
+        // We will increase the patrol speed only after player survives 30 seconds
+        if (this.isPatrol() && e.detail.score <= this.increasePatrolAfter) {
+            return;
+        }
+        // At this point we don't want to increase the speed more, it is already to challenging
+        if (this.speed > 2) {
+            return;
+        }
+        this.speed += this.increaseSpeed;
+    }
+
+    onUpdate() {
         // If we don't have a target then we return, we can't do anything
         if (this.target === null) {
             return;
@@ -246,7 +312,9 @@ const Enemy = class extends Drawable {
             return;
         }
 
-        this.proximityDetection(this.target.position);
+        const distance = Utils.distance(this.position, this.target.position);
+
+        this.color = this.inRange(distance) ? Utils.randomColor() : this.originalColor;
 
         // Check for the object mode to behave
         switch (this.mode) {
@@ -254,7 +322,11 @@ const Enemy = class extends Drawable {
                 this.goTo(this.target.position);
                 break;
             case 1: // Patrol in a area| Random movement
-                this.patrol();
+                if (this.inRange(distance)) {
+                    this.goTo(this.target.position);
+                } else {
+                    this.patrol();
+                }
                 break;
         }
     }
@@ -264,12 +336,8 @@ const Enemy = class extends Drawable {
         this.originalColor = this.color;
     }
 
-    proximityDetection(position) {
-        if (Utils.distance(this.position, position) <= this.proximityRange) {
-            this.color = Utils.randomColor();
-        } else {
-            this.color = this.originalColor;
-        }
+    inRange(distance) {
+        return distance <= this.proximityRange
     }
 
     goTo(position) {
@@ -301,12 +369,12 @@ const Enemy = class extends Drawable {
 };
 
 const Trap = class extends Drawable {
-    init() {
+    onInit() {
         this.type = 2;
         this.target = null;
     }
 
-    update() {
+    onUpdate() {
         if (this.target === null) {
             return;
         }
@@ -354,27 +422,45 @@ const ObjectFactory = class {
  */
 const Game = class {
     constructor(lives, objects) {
-        this.lives = this.maxLives = lives;
+        this.maxLives = lives;
         this.objects = objects;
-        this.cursor = {x: 0, y: 0};
+        this.score = 0;
+        this.elapsed = 0;
+        this.reset();
     }
 
     reset() {
-        this.lives = 3;
+        this.lives = this.maxLives;
+        this.elapsed = 0;
+        this.score = 0;
+        this.cursor = {x: -1, y: -1};
         context.clearRect(0, 0, canvas.width, canvas.height);
+        dispatcher.trigger('game.reset', this);
         return this;
+    }
+
+    isDead() {
+        return this.lives <= 0;
+    }
+
+    hasLives() {
+        return this.lives > 0;
     }
 
     // Things done on the start of the game. Initialization
     start() {
         this.keepAlive = true;
-        this.lives = this.maxLives;
         dispatcher.trigger('game.init', this);
         this.eachObject(function (o) {
-            dispatcher.on('game.update', o.update.bind(o));
-            dispatcher.on('game.draw', o.draw.bind(o));
+            dispatcher.on('game.reset', o.onReset.bind(o));
+            dispatcher.on('game.update', o.onUpdate.bind(o));
+            dispatcher.on('game.draw', o.onDraw.bind(o));
+            dispatcher.on('game.difficulty.increase', o.onDifficultyIncrease.bind(o));
             dispatcher.trigger('game.object.init', o);
         });
+        if (this.isDead()) {
+            this.reset();
+        }
         this.animate();
     }
 
@@ -387,6 +473,11 @@ const Game = class {
     loop(ms) {
         if (!this.keepAlive) {
             return;
+        }
+        this.elapsed = ms;
+        this.score = Math.floor(this.elapsed / 1000);
+        if (this.score > 10) {
+            dispatcher.trigger('game.difficulty.increase', this);
         }
         this.update();
         this.draw();
@@ -404,15 +495,16 @@ const Game = class {
     // Player gets hit by the enemy, do some stuff
     hit() {
         alert("You got hit! :(");
-        if (this.lives <= 0) {
+        if (this.isDead()) {
             gui.status("You've lost! Better luck next time.");
             this.end();
+            this.reset();
         } else {
             this.lives -= 1;
             gui.lives(this.lives);
             this.eachObject(function (o) {
                 if (o.isPlayer()) {
-                    o.move(createVector());
+                    o.move(Vector.out());
                 } else {
                     o.move(Vector.random());
                 }
@@ -422,18 +514,17 @@ const Game = class {
 
     // Update on frame
     update() {
-        gui.position(this.cursor);
-        dispatcher.trigger('game.update');
+        dispatcher.trigger('game.update', this);
     }
 
     setCursorPosition(e) {
         this.cursor = Utils.getCanvasCursorPos(e, canvas);
     }
 
-    // Draw after update
+    // Draw after onUpdate
     draw() {
         context.clearRect(0, 0, canvas.width, canvas.height);
-        dispatcher.trigger('game.draw');
+        dispatcher.trigger('game.draw', this);
     }
 
     eachObject(callback) {
@@ -465,6 +556,11 @@ dispatcher.on('game.init', function (e) {
     gui.el('hud').style.display = 'block';
 });
 
+dispatcher.on('game.update', function (e) {
+    gui.position(e.detail.cursor);
+    gui.score(e.detail.score);
+});
+
 dispatcher.on('game.object.init', function (e) {
     let o = e.detail;
     const enemyColor = gui.el('enemyColor').value;
@@ -492,3 +588,7 @@ btnStart.addEventListener('click', function () {
 });
 
 
+dispatcher.on('game.reset', function (e) {
+    gui.score(e.detail.score);
+    btnStart.innerHTML = 'Start';
+});
