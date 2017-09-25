@@ -15,19 +15,25 @@ Some references I've used:
  * http://blog.sklambert.com/html5-canvas-game-2d-collision-detection/
  * https://stackoverflow.com/questions/19337180/movement-multiple-objects-in-canvas-to-x-y-coordinate
  * https://www.w3schools.com/graphics/game_intro.asp
+ * https://jsfiddle.net/sans_amour/eqc176y2/2/
 
 ## Changelog
 
+### Version 1.2
+    * Improved animations. Enemies now move smoothly.
+    * Player now is placed safer on the map.
+    * Better feedback when game finishes.
+
 ### Version 1.1
-    * Patrols are now chasing the player when gets in their range 
-    * Added score
-    * Added difficulty increase over time
+    * Patrols are now chasing the player when gets in their range.
+    * Added score.
+    * Added difficulty increase over time.
 ### Version 1.0
-    * Enemy now chase the player
-    * Added Traps/Obstacles
-    * Added Patrols
-    * When player gets hit lives decreases
-    * User is able to start/stop the game
-    * User can choose a color for his player and the enemy
-    * Added a nice looking background
-    * Improved the design
+    * Enemy now chase the player.
+    * Added Traps/Obstacles.
+    * Added Patrols.
+    * When player gets hit lives decreases.
+    * User is able to start/stop the game.
+    * User can choose a color for his player and the enemy.
+    * Added a nice looking background.
+    * Improved the design.

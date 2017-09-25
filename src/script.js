@@ -41,17 +41,6 @@ const Utils = class {
     }
 
     /**
-     * Gets the distance between two vectors
-     * @see https://stackoverflow.com/questions/20916953/get-distance-between-two-points-in-canvas
-     * @param vector
-     * @param vector2
-     * @returns {number}
-     */
-    static distance(vector, vector2) {
-        return Math.hypot(vector.x - vector2.x, vector.y - vector2.y);
-    }
-
-    /**
      *
      * @param canvas
      * @returns {{x: number, y: number}}
@@ -125,7 +114,7 @@ const GUI = class {
     }
 
     position(vector) {
-        return this.text('position', 'X: ' + vector.x + ', Y: ' + vector.y);
+        return this.text('position', "X: " + vector.x + " Y: " + vector.y);
     }
 
     score(value) {
@@ -138,6 +127,10 @@ const Vector = class {
     constructor(x, y) {
         this.x = x;
         this.y = y;
+    }
+
+    toString() {
+        return "X: " + this.x + " Y: " + this.y;
     }
 
     update(vector) {
@@ -159,6 +152,14 @@ const Vector = class {
         const y = Utils.random(30, boundings.height - 10);
         return new Vector(x, y);
     }
+
+    distance(vector) {
+        return Math.hypot(this.x - vector.x, this.y - vector.y);
+    }
+
+    angle(vector) {
+        return Math.atan2(vector.y - this.y, vector.x - this.x);
+    }
 };
 
 const Drawable = class {
@@ -166,7 +167,7 @@ const Drawable = class {
         this.position = position;
         this.width = size.x;
         this.height = size.y;
-        this.speed = 1;
+        this.speed = 60; //Pixels per second
         this.setColor('#ffffff');
         this.type = 0;
         this.onInit();
@@ -262,9 +263,11 @@ const Enemy = class extends Drawable {
         this.lastWaypoint = null;
         this.originalColor = this.color;
         this.proximityRange = 150;
-        this.increaseSpeed = 0.001;
+        this.increaseSpeed = 2;
+        this.speed = 60;
+        this.maxSpeed = 300;
         this.increasePatrolAfter = 30; // seconds
-
+        this.increaseChaserAfter = 10; // seconds
     }
 
     setMode(type) {
@@ -284,36 +287,41 @@ const Enemy = class extends Drawable {
     }
 
     onReset(e) {
-        this.speed = 1;
+        this.speed = 60;
         this.lastWaypoint = null;
-        log('Reset speed: ' + this.speed);
     }
 
     onDifficultyIncrease(e) {
         // We will increase the patrol speed only after player survives 30 seconds
-        if (this.isPatrol() && e.detail.score <= this.increasePatrolAfter) {
+        if (this.isPatrol() && e.detail.seconds <= this.increasePatrolAfter) {
             return;
         }
-        // At this point we don't want to increase the speed more, it is already to challenging
-        if (this.speed > 2) {
+        // We will increase the patrol speed only after player survives 10 seconds
+        if (this.isChaser() && e.detail.seconds <= this.increaseChaserAfter) {
             return;
         }
-        this.speed += this.increaseSpeed;
+
+        // At this point we don't want to increase the speed anymore, it is already to challenging
+        if (this.speed > this.maxSpeed) {
+            this.speed = this.maxSpeed;
+            return;
+        }
+
+        this.speed += this.increaseSpeed * e.detail.deltaTime();
     }
 
-    onUpdate() {
+    onUpdate(e) {
         // If we don't have a target then we return, we can't do anything
         if (this.target === null) {
             return;
         }
         // If this object collides with it's target the we raise the 'hit' event
         if (this.collides(this.target)) {
-            game.hit();
+            dispatcher.trigger('hit', {target: this.target, object: this});
             return;
         }
-
-        const distance = Utils.distance(this.position, this.target.position);
-
+        this.onDifficultyIncrease(e);
+        const distance = this.position.distance(this.target.position);
         this.color = this.inRange(distance) ? Utils.randomColor() : this.originalColor;
 
         // Check for the object mode to behave
@@ -341,12 +349,23 @@ const Enemy = class extends Drawable {
     }
 
     goTo(position) {
+        const angle = this.position.angle(position);
+        const deltaTime = game.deltaTime();
+        const velocity = this.speed * deltaTime;
+        this.position.x += velocity * Math.cos(angle);
+        this.position.y += velocity * Math.sin(angle);
+    }
+
+    /**
+     * @deprecated
+     * @param position
+     */
+    oldMovement(position) {
         if (position.x > this.edgeL()) {
             this.position.x += this.speed;
         } else {
             this.position.x -= this.speed;
         }
-
         if (position.y > this.edgeT()) {
             this.position.y += this.speed;
         } else {
@@ -354,12 +373,15 @@ const Enemy = class extends Drawable {
         }
     }
 
+    /**
+     *
+     */
     patrol() {
         if (this.lastWaypoint === null) {
             this.lastWaypoint = Vector.random();
         }
 
-        if (Utils.distance(this.position, this.lastWaypoint) <= 50) {
+        if (this.position.distance(this.lastWaypoint) <= 50) {
             this.lastWaypoint = Vector.random();
         }
 
@@ -380,7 +402,7 @@ const Trap = class extends Drawable {
         }
 
         if (this.collides(this.target)) {
-            game.hit();
+            dispatcher.trigger('hit', {target: this.target, object: this});
         }
     }
 
@@ -389,7 +411,7 @@ const Trap = class extends Drawable {
     }
 };
 
-const ObjectFactory = class {
+const Factory = class {
 
     static trap(position, size) {
         return new Trap(position, size);
@@ -402,14 +424,14 @@ const ObjectFactory = class {
     }
 
     static chaser(size, position = null) {
-        return ObjectFactory.enemy(size, 0, position);
+        return Factory.enemy(size, 0, position);
     }
 
     static patrol(size, position = null) {
-        return ObjectFactory.enemy(size, 1, position);
+        return Factory.enemy(size, 1, position);
     }
 
-    static generate(max, callback) {
+    static make(max, callback) {
         for (let i = 0; i < max; i++) {
             callback();
         }
@@ -424,19 +446,27 @@ const Game = class {
     constructor(lives, objects) {
         this.maxLives = lives;
         this.objects = objects;
-        this.score = 0;
-        this.elapsed = 0;
+        this.secondsDivider = 1000;
         this.reset();
+        dispatcher.on('hit', this.onHit.bind(this));
     }
 
-    reset() {
-        this.lives = this.maxLives;
-        this.elapsed = 0;
-        this.score = 0;
-        this.cursor = {x: -1, y: -1};
-        context.clearRect(0, 0, canvas.width, canvas.height);
-        dispatcher.trigger('game.reset', this);
-        return this;
+    // Player gets hit by the enemy, do some stuff
+    onHit(e) {
+        if (this.isDead()) {
+            alert("You have survived: " + this.seconds + " seconds! Better luck next time...");
+            this.end();
+            this.reset();
+        } else {
+            alert("You got hit! :(");
+            this.lives -= 1;
+            gui.lives(this.lives);
+            this.placeObjects();
+        }
+    }
+
+    deltaTime() {
+        return this.delta / this.secondsDivider;
     }
 
     isDead() {
@@ -455,13 +485,24 @@ const Game = class {
             dispatcher.on('game.reset', o.onReset.bind(o));
             dispatcher.on('game.update', o.onUpdate.bind(o));
             dispatcher.on('game.draw', o.onDraw.bind(o));
-            dispatcher.on('game.difficulty.increase', o.onDifficultyIncrease.bind(o));
             dispatcher.trigger('game.object.init', o);
         });
         if (this.isDead()) {
             this.reset();
         }
+        this.placeObjects();
         this.animate();
+    }
+
+    reset() {
+        this.lives = this.maxLives;
+        this.seconds = 0;
+        this.delta = 0;
+        this.cursor = {x: -1, y: -1};
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        this.timestart = (new Date()).getTime();
+        dispatcher.trigger('game.reset', this);
+        return this;
     }
 
     end() {
@@ -470,18 +511,20 @@ const Game = class {
     }
 
     // This loops on every frame
-    loop(ms) {
+    /**
+     *
+     * @param elapsed Milliseconds
+     */
+    loop(elapsed) {
         if (!this.keepAlive) {
             return;
         }
-        this.elapsed = ms;
-        this.score = Math.floor(this.elapsed / 1000);
-        if (this.score > 10) {
-            dispatcher.trigger('game.difficulty.increase', this);
-        }
+        this.delta = (new Date()).getTime() - this.timestart; // Current time - start time
+        this.seconds = Math.floor(elapsed / this.secondsDivider);
         this.update();
         this.draw();
         this.animate();
+        this.timestart = (new Date()).getTime();
     }
 
     running() {
@@ -492,24 +535,28 @@ const Game = class {
         requestAnimationFrame(game.loop.bind(this));
     }
 
-    // Player gets hit by the enemy, do some stuff
-    hit() {
-        alert("You got hit! :(");
-        if (this.isDead()) {
-            gui.status("You've lost! Better luck next time.");
-            this.end();
-            this.reset();
-        } else {
-            this.lives -= 1;
-            gui.lives(this.lives);
-            this.eachObject(function (o) {
-                if (o.isPlayer()) {
-                    o.move(Vector.out());
-                } else {
-                    o.move(Vector.random());
+
+    placeObjects() {
+        log("Placing objects...");
+        let player = undefined;
+        let pos = Vector.zero();
+        let dist = 0;
+        this.eachObject(function (o) {
+            if (o.isPlayer()) {
+                o.move(Vector.random());
+                player = o;
+            } else {
+                let minDistance = 400;
+                if (o.isType(2)) {
+                    minDistance = 150;
                 }
-            });
-        }
+                do {
+                    pos = Vector.random();
+                    dist = player.position.distance(pos);
+                } while (dist <= minDistance);
+                o.move(pos);
+            }
+        });
     }
 
     // Update on frame
@@ -541,13 +588,13 @@ const boundings = canvas.getBoundingClientRect();
 const dispatcher = new EventDispatcher;
 const size = createVector(30, 30);
 let player = new Player(Vector.out(), size);
-const game = new Game(3, [player, ObjectFactory.chaser(size)]);
+const game = new Game(3, [player, Factory.chaser(size)]);
 canvas.addEventListener('mousemove', game.setCursorPosition.bind(game));
-ObjectFactory.generate(2, function () {
-    game.objects.push(ObjectFactory.patrol(size));
+Factory.make(2, function () {
+    game.objects.push(Factory.patrol(size));
 });
-ObjectFactory.generate(15, function () {
-    game.objects.push(ObjectFactory.trap(Vector.random(), createVector(Utils.random(3, 20), Utils.random(3, 60))));
+Factory.make(15, function () {
+    game.objects.push(Factory.trap(Vector.random(), createVector(Utils.random(3, 20), Utils.random(3, 60))));
 });
 dispatcher.on('game.init', function (e) {
     const game = e.detail;
@@ -558,7 +605,7 @@ dispatcher.on('game.init', function (e) {
 
 dispatcher.on('game.update', function (e) {
     gui.position(e.detail.cursor);
-    gui.score(e.detail.score);
+    gui.score(e.detail.seconds);
 });
 
 dispatcher.on('game.object.init', function (e) {
@@ -589,6 +636,6 @@ btnStart.addEventListener('click', function () {
 
 
 dispatcher.on('game.reset', function (e) {
-    gui.score(e.detail.score);
+    gui.score(e.detail.seconds);
     btnStart.innerHTML = 'Start';
 });
