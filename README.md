@@ -20,7 +20,7 @@ Some references I've used:
 ## Changelog
 
 ### Version 1.2
-    * Improved animations. Enemies now move smoothly.
+    * Improved animations. Enemies are now moving smoothly.
     * Player now is placed safer on the map.
     * Better feedback when game finishes.
 
