@@ -11,10 +11,6 @@ The game plot is to survive as much as you can, runnig from the chaser. Also the
  It runs in your browser
 ```
 
-## Usage example
-
-A few motivating and useful examples of how your product can be used. Spice this up with code blocks and potentially more screenshots.
-
 ## About the enemies
  * Chaser will follow it's target until he catches it.
  * Patrol will move to random points on the map, if the player enters in his proximity range he will start chase the player until he will exit out of the range.
