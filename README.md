@@ -16,6 +16,14 @@ The game plot is to survive as much as you can, runnig from the chaser. Also the
  * Patrol will move to random points on the map, if the player enters in his proximity range he will start chase the player until he will exit out of the range.
  * Trap/Obstacle are steady objects meant to harden the player's survival. Traps are randomly placed on the map.
 
+## Requirements
+TODO: user stories, epics.
+
+## Teamwork
+This it was a individual project.
+
+## Time & Task Management
+TODO: Ghant Chart, Burdown Chart.
 
 ## Release History
 ### Version 1.2
