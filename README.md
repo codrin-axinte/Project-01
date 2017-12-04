@@ -3,7 +3,7 @@
 
 ![Screenshot](http://via.placeholder.com/711x400)
 
-The game plot is to survive as much as you can, runnig from the chaser. Also there are some other features like patrols and traps which will increase the difficulty. User is able to choose his and enemies color as he likes.
+The game plot is to survive as much as you can, runnig from the chaser. Also there are some other features such patrols and traps which will increase the difficulty. User is able to choose his and enemies color as he likes.
 
 ## Installation
 
