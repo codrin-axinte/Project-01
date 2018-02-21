@@ -25,6 +25,21 @@ position(vector) {
     return this.text('position', "X: " + vector.x + " Y: " + vector.y);
 }
 ```
+Creating a rectangular shape on a specified position.
+```js
+/**
+ *
+ * @param {Vector} position
+ * @param {Vector} size
+ * @param {string} color
+ */
+function rect(position, size, color) {
+    context.beginPath();
+    context.fillStyle = color;
+    context.rect(position.x, position.y, size.x, size.y);
+    context.fill();
+}
+```
 
 ## Requirements
 TODO: user stories, epics.
