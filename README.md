@@ -39,15 +39,6 @@ function rect(position, size, color) {
 }
 ```
 
-## Requirements
-TODO: user stories, epics.
-
-## Teamwork
-This it was a individual project.
-
-## Time & Task Management
-TODO: Ghant Chart, Burdown Chart.
-
 ## Release History
 ### Version 1.2
     * Improved animations. Enemies are now moving smoothly.
